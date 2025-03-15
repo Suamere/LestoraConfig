@@ -4,6 +4,14 @@ This is a utility mod that other Lestora mods depend on to load shared config fi
 
 ## Features
 - **Usage:** There isn't much direct use for this mod, though you can list out configurations if you want to follow the commands.
+- As of version 1.0.0, this is only to store shared configuration of light levels in `lestora-lighting.toml`
+- More configuration will be added as Lestora grows.
+- This mod is set up (or trying to be set up) to work in Single Player, or in Multi-Player and Dedicated Server, where servers are Authoritative over Local Configuration.
+
+## Config
+- Configuration hard-codes a few checks, like checking if an item is "Lit", or if Pickles are "Waterlogged".  But beyond the name, you must sometimes specify a BlockState "amount".  For example, with Candles, there is a different light level for 1 candle versus 4 candles.  So specify them like so:
+- "minecraft:candle(3)=9", "minecraft:torch", etc
+- Feel free to request other Block States be set up for specific lighting needs.
 
 ## Manual Installation
 1. Download the mod JAR from CurseForge.
