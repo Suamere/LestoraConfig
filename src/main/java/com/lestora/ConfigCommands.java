@@ -9,10 +9,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
-public class DLCommands {
+class ConfigCommands {
 
     @SubscribeEvent
-    public static void onRegisterClientCommands(RegisterCommandsEvent event) {
+    static void onRegisterClientCommands(RegisterCommandsEvent event) {
         var root = Commands.literal("lestora");
 
         listLightConfigs(root);
@@ -20,12 +20,12 @@ public class DLCommands {
         event.getDispatcher().register(root);
     }
 
-    private static void listLightConfigs(LiteralArgumentBuilder<CommandSourceStack> root) {
+    static void listLightConfigs(LiteralArgumentBuilder<CommandSourceStack> root) {
         root.then(Commands.literal("config")
                 .then(Commands.literal("lighting")
                         .then(Commands.literal("list")
                                 .executes(ctx -> {
-                                    var lightConfigs = Config.getLightLevels();
+                                    var lightConfigs = LestoraConfig.getLightLevels();
                                     // Send header message to the player
                                     ctx.getSource().sendSuccess(
                                             () -> Component.literal("§bLestora Config -- Light Configurations"),
@@ -33,7 +33,7 @@ public class DLCommands {
                                     );
                                     for (var entry : lightConfigs.entrySet()) {
                                         ctx.getSource().sendSuccess(
-                                                () -> Component.literal("§b" + entry.getKey() + " = " + entry.getValue()),
+                                                () -> Component.literal("§b" + entry.getKey().getResource() + "(" + entry.getKey().getAmount() + ") = " + entry.getValue()),
                                                 false
                                         );
                                     }

@@ -3,7 +3,7 @@
 This is a utility mod that other Lestora mods depend on to load shared config files, allowing you to pick and choose between which Lestora mods to install without directly depending on one another.
 
 ## Features
-- **Usage:** Dynamically lights up the area while holding a glowing item, or if you throw an entity.
+- **Usage:** There isn't much direct use for this mod, though you can list out configurations if you want to follow the commands.
 
 ## Manual Installation
 1. Download the mod JAR from CurseForge.
@@ -11,7 +11,7 @@ This is a utility mod that other Lestora mods depend on to load shared config fi
 3. Launch Minecraft with the Forge profile.
 
 ## Commands
-- Use the command `/lestora config lighting list`: to print the current in-memory understanding of light level configurations to the console.
+- Use the command `/lestora config lighting list`: to print the current in-memory understanding of light level configurations to your player chat.
 
 ## Compatibility
 - **Minecraft Version:** 1.21.4
