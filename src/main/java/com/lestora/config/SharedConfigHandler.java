@@ -1,4 +1,4 @@
-package com.lestora;
+package com.lestora.config;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;

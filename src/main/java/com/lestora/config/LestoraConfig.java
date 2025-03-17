@@ -1,4 +1,4 @@
-package com.lestora;
+package com.lestora.config;
 
 import net.minecraft.resources.ResourceLocation;
 import java.util.List;
@@ -6,12 +6,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 
-class LestoraConfig {
+public class LestoraConfig {
     static boolean isServerAuthoritative;
     static final Map<RLAmount, Integer> lightLevelsMap = new ConcurrentHashMap<>();
 
     public static Integer getLightLevel(ResourceLocation rl, int amount) {
-        return lightLevelsMap.get(new RLAmount(rl, amount));
+        for (Map.Entry<RLAmount, Integer> entry : lightLevelsMap.entrySet()) {
+            RLAmount key = entry.getKey();
+            if (key.getResource().equals(rl) && key.getAmount() == amount) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
     public static Map<RLAmount, Integer> getLightLevels() {

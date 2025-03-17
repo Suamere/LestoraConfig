@@ -1,4 +1,4 @@
-package com.lestora;
+package com.lestora.config;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;

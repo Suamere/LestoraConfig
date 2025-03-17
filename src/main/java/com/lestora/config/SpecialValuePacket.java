@@ -1,4 +1,4 @@
-package com.lestora;
+package com.lestora.config;
 
 import net.minecraft.network.FriendlyByteBuf;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.lestora;
+package com.lestora.config;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;

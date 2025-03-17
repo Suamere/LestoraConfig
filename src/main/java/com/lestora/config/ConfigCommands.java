@@ -1,4 +1,4 @@
-package com.lestora;
+package com.lestora.config;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.client.Minecraft;

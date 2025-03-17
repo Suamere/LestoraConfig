@@ -1,4 +1,4 @@
-package com.lestora;
+package com.lestora.config;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.SimpleChannel;
