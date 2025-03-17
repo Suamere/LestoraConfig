@@ -9,7 +9,7 @@ This is a utility mod that other Lestora mods depend on to load shared config fi
 - This mod is set up (or trying to be set up) to work in Single Player, or in Multi-Player and Dedicated Server, where servers are Authoritative over Local Configuration.
 
 ## Config
-- Configuration hard-codes a few checks, like checking if an item is "Lit", or if Pickles are "Waterlogged".  But beyond the name, you must sometimes specify a BlockState "amount".  For example, with Candles, there is a different light level for 1 candle versus 4 candles.  So specify them like so:
+- Configuration hard-codes a few checks, like checking if an item is "Lit", or if Pickles are "Waterlogged", and if cave_vines have berries.  But beyond the name, you must sometimes specify a BlockState "amount".  For example, with Candles, there is a different light level for 1 candle versus 4 candles.  So specify them like so:
 - "minecraft:candle(3)=9", "minecraft:torch", etc
 - Feel free to request other Block States be set up for specific lighting needs.
 
@@ -20,6 +20,7 @@ This is a utility mod that other Lestora mods depend on to load shared config fi
 
 ## Commands
 - Use the command `/lestora config lighting list`: to print the current in-memory understanding of light level configurations to your player chat.
+- Use the command `/lestora config whatAmIHolding`: This command will tell you what you're holding in each hand, in case you need the official name in order to add it to the config file.
 
 ## Compatibility
 - **Minecraft Version:** 1.21.4

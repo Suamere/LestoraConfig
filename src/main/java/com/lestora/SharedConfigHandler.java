@@ -24,24 +24,24 @@ class SharedConfigHandler {
                 .defineList("items",
                         Arrays.asList(
                                 // Special Blocks
-                                "minecraft:light_block(15)=15",     // Light Block
-                                "minecraft:light_block(14)=14",     // Light Block
-                                "minecraft:light_block(13)=13",     // Light Block
-                                "minecraft:light_block(12)=12",     // Light Block
-                                "minecraft:light_block(11)=11",     // Light Block
-                                "minecraft:light_block(10)=10",     // Light Block
-                                "minecraft:light_block(9)=9",       // Light Block
-                                "minecraft:light_block(7)=7",       // Light Block
-                                "minecraft:light_block(6)=6",       // Light Block
-                                "minecraft:light_block(5)=5",       // Light Block
-                                "minecraft:light_block(4)=4",       // Light Block
-                                "minecraft:light_block(3)=3",       // Light Block
-                                "minecraft:light_block(2)=2",       // Light Block
-                                "minecraft:light_block(1)=1",       // Light Block
-                                "minecraft:sea_pickles(4)=15",      // Waterlogged Sea Pickles (4)
-                                "minecraft:sea_pickles(3)=12",      // Waterlogged Sea Pickles (3)
-                                "minecraft:sea_pickles(2)=9",       // Waterlogged Sea Pickles (2)
-                                "minecraft:sea_pickles(1)=6",       // Waterlogged Sea Pickles (1)
+                                "minecraft:light(15)=15",     // Light Block
+                                "minecraft:light(14)=14",     // Light Block
+                                "minecraft:light(13)=13",     // Light Block
+                                "minecraft:light(12)=12",     // Light Block
+                                "minecraft:light(11)=11",     // Light Block
+                                "minecraft:light(10)=10",     // Light Block
+                                "minecraft:light(9)=9",       // Light Block
+                                "minecraft:light(7)=7",       // Light Block
+                                "minecraft:light(6)=6",       // Light Block
+                                "minecraft:light(5)=5",       // Light Block
+                                "minecraft:light(4)=4",       // Light Block
+                                "minecraft:light(3)=3",       // Light Block
+                                "minecraft:light(2)=2",       // Light Block
+                                "minecraft:light(1)=1",       // Light Block
+                                "minecraft:sea_pickle(4)=15",      // Waterlogged Sea Pickles (4)
+                                "minecraft:sea_pickle(3)=12",      // Waterlogged Sea Pickles (3)
+                                "minecraft:sea_pickle(2)=9",       // Waterlogged Sea Pickles (2)
+                                "minecraft:sea_pickle(1)=6",       // Waterlogged Sea Pickles (1)
                                 "minecraft:respawn_anchor(4)=15",   // Respawn Anchor (4)
                                 "minecraft:respawn_anchor(3)=11",   // Respawn Anchor (3)
                                 "minecraft:respawn_anchor(2)=7",    // Respawn Anchor (2)
@@ -66,7 +66,9 @@ class SharedConfigHandler {
                                 "minecraft:end_gateway=15",
                                 "minecraft:end_portal=15",
                                 "minecraft:fire=15",
-                                "minecraft:froglight=15",
+                                "minecraft:ochre_froglight=15",
+                                "minecraft:pearlescent_froglight=15",
+                                "minecraft:verdant_froglight=15",
                                 "minecraft:glowstone=15",
                                 "minecraft:jack_o_lantern=15",
                                 "minecraft:lantern=15",
@@ -76,7 +78,7 @@ class SharedConfigHandler {
                                 "minecraft:shroomlight=15",
 
                                 // Light level 14
-                                "minecraft:cave_vines_with_berries=14",
+                                "minecraft:cave_vines=14", // Ensure it has metadata of "hasBerries"
                                 "minecraft:end_rod=14",
                                 "minecraft:torch=14",
 
@@ -110,7 +112,7 @@ class SharedConfigHandler {
                                 "minecraft:large_amethyst_bud=4",
 
                                 // Light level 3
-                                "minecraft:magma=3",                // or "magma_block" depending on your version
+                                "minecraft:magma_block=3",                // or "magma_block" depending on your version
 
                                 // Light level 2
                                 "minecraft:medium_amethyst_bud=2",
