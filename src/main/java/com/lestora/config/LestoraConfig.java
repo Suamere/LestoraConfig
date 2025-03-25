@@ -10,14 +10,48 @@ public class LestoraConfig {
     static boolean isServerAuthoritative;
     static final Map<RLAmount, Integer> lightLevelsMap = new ConcurrentHashMap<>();
 
+    static final Map<ResourceLocation, Integer> minCache = new ConcurrentHashMap<>();
+    static final Map<ResourceLocation, Integer> maxCache = new ConcurrentHashMap<>();
+
     public static Integer getLightLevel(ResourceLocation rl, int amount) {
+        return lightLevelsMap.get(new RLAmount(rl, amount));
+    }
+
+    public static Integer getMinLightLevel(ResourceLocation rl) {
+        cacheMinAndMax(rl);
+        return minCache.get(rl);
+    }
+
+    public static Integer getMaxLightLevel(ResourceLocation rl) {
+        cacheMinAndMax(rl);
+        return maxCache.get(rl);
+    }
+
+    private static void cacheMinAndMax(ResourceLocation rl) {
+        if (minCache.containsKey(rl) && maxCache.containsKey(rl)) {
+            return;
+        }
+
+        Integer min = null;
+        Integer max = null;
         for (Map.Entry<RLAmount, Integer> entry : lightLevelsMap.entrySet()) {
             RLAmount key = entry.getKey();
-            if (key.getResource().equals(rl) && key.getAmount() == amount) {
-                return entry.getValue();
+            if (key.getResource().equals(rl)) {
+                int amt = key.getAmount();
+                if (min == null || amt < min) {
+                    min = amt;
+                }
+                if (max == null || amt > max) {
+                    max = amt;
+                }
             }
         }
-        return null;
+        if (min != null) {
+            minCache.put(rl, min);
+        }
+        if (max != null) {
+            maxCache.put(rl, max);
+        }
     }
 
     public static Map<RLAmount, Integer> getLightLevels() {
@@ -28,6 +62,8 @@ public class LestoraConfig {
         if (from.equals("CLIENT") && isServerAuthoritative) return;
         else if (from.equals("SERVER")) isServerAuthoritative = true;
 
+        minCache.clear();
+        maxCache.clear();
         lightLevelsMap.clear();
         for (String entry : stringMap) {
             String[] split = entry.split("=");
@@ -35,7 +71,7 @@ public class LestoraConfig {
                 String itemId = split[0].trim();
                 try {
                     int level = Integer.parseInt(split[1].trim());
-                    int amount = 0;
+                    int amount = 1;
                     if (itemId.contains("(")) {
                         int start = itemId.indexOf('(');
                         int end = itemId.indexOf(')', start);

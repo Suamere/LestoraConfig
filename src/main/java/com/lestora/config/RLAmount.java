@@ -31,7 +31,7 @@ public class RLAmount {
         if (this == o) return true;
         if (o == null) return false;
         if (!(o instanceof RLAmount that)) return false;
-        return amount == that.amount && Objects.equals(resource, that.resource);
+        return Objects.equals(resource, that.resource) && amount == that.amount;
     }
 
     @Override
