@@ -37,12 +37,12 @@ public class LestoraConfig {
         for (Map.Entry<RLAmount, Integer> entry : lightLevelsMap.entrySet()) {
             RLAmount key = entry.getKey();
             if (key.getResource().equals(rl)) {
-                int amt = key.getAmount();
-                if (min == null || amt < min) {
-                    min = amt;
+                int lightLevel = entry.getValue();
+                if (min == null || lightLevel < min) {
+                    min = lightLevel;
                 }
-                if (max == null || amt > max) {
-                    max = amt;
+                if (max == null || lightLevel > max) {
+                    max = lightLevel;
                 }
             }
         }
