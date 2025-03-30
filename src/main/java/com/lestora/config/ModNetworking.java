@@ -19,7 +19,7 @@ class ModNetworking {
                 .decoder(SpecialValuePacket::decode)
                 .consumer((packet, context) -> {
                     context.enqueueWork(() -> {
-                        LestoraConfig.setLightLevelsMap(packet.lightLevelsMap(), "SERVER");
+                        LightConfig.setLightLevelsMap(packet.lightLevelsMap(), "SERVER");
                     });
                     context.setPacketHandled(true);
                 })

@@ -10,6 +10,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Map;
+
 @Mod.EventBusSubscriber
 class ConfigCommands {
 
@@ -17,29 +19,52 @@ class ConfigCommands {
     static void onRegisterClientCommands(RegisterCommandsEvent event) {
         var root = Commands.literal("lestora");
 
-        listLightConfigs(root);
+        listDefaultLightConfigs(root);
+        listUserLightConfigs(root);
+        listUniqueLightConfigs(root);
         registerWhatAmIHolding(root);
 
         event.getDispatcher().register(root);
     }
 
-    static void listLightConfigs(LiteralArgumentBuilder<CommandSourceStack> root) {
+    static void listDefaultLightConfigs(LiteralArgumentBuilder<CommandSourceStack> root) {
         root.then(Commands.literal("config")
                 .then(Commands.literal("lighting")
-                        .then(Commands.literal("list")
+                        .then(Commands.literal("listDefaultConfig")
                                 .executes(ctx -> {
-                                    var lightConfigs = LestoraConfig.getLightLevels();
-                                    // Send header message to the player
-                                    ctx.getSource().sendSuccess(
-                                            () -> Component.literal("§bLestora Config -- Light Configurations"),
-                                            false
-                                    );
-                                    for (var entry : lightConfigs.entrySet()) {
-                                        ctx.getSource().sendSuccess(
-                                                () -> Component.literal("§b" + entry.getKey().getResource() + "(" + entry.getKey().getAmount() + ") = " + entry.getValue()),
-                                                false
-                                        );
-                                    }
+                                    ctx.getSource().sendSuccess(() -> Component.literal("§bLestora Config -- Default Light Configurations"), false);
+                                    for (var entry : LightConfig.getDefaultLightLevels().entrySet())
+                                        ctx.getSource().sendSuccess(() -> Component.literal("§b" + entry.getKey().getResource() + "(" + entry.getKey().getAmount() + ") = " + entry.getValue()), false);
+                                    return 1;
+                                })
+                        )
+                )
+        );
+    }
+
+    static void listUserLightConfigs(LiteralArgumentBuilder<CommandSourceStack> root) {
+        root.then(Commands.literal("config")
+                .then(Commands.literal("lighting")
+                        .then(Commands.literal("listUserConfig")
+                                .executes(ctx -> {
+                                    ctx.getSource().sendSuccess(() -> Component.literal("§bLestora Config -- User Light Configurations"), false);
+                                    for (var entry : LightConfig.getLightLevels().entrySet())
+                                        ctx.getSource().sendSuccess(() -> Component.literal("§b" + entry.getKey().getResource() + "(" + entry.getKey().getAmount() + ") = " + entry.getValue()), false);
+                                    return 1;
+                                })
+                        )
+                )
+        );
+    }
+
+    static void listUniqueLightConfigs(LiteralArgumentBuilder<CommandSourceStack> root) {
+        root.then(Commands.literal("config")
+                .then(Commands.literal("lighting")
+                        .then(Commands.literal("listUniqueConfig")
+                                .executes(ctx -> {
+                                    ctx.getSource().sendSuccess(() -> Component.literal("§bLestora Config -- Unique Light Configurations"), false);
+                                    for (var entry : LightConfig.getUniqueLightLevels().entrySet())
+                                        ctx.getSource().sendSuccess(() -> Component.literal("§b" + entry.getKey().getResource() + "(" + entry.getKey().getAmount() + ") = " + entry.getValue()), false);
                                     return 1;
                                 })
                         )
