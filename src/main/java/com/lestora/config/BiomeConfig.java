@@ -1,6 +1,8 @@
 package com.lestora.config;
 
 import net.minecraft.resources.ResourceLocation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +12,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class BiomeConfig {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     static boolean isServerAuthoritative;
     static final Map<ResourceLocation, Float> biomeTempMap = new HashMap<>();
     static final Map<ResourceLocation, Float> biomeTempUniqueMap = new HashMap<>();
@@ -123,6 +127,9 @@ public class BiomeConfig {
         try {
             if (from.equals("CLIENT") && isServerAuthoritative) return;
             else if (from.equals("SERVER")) isServerAuthoritative = true;
+
+            System.out.println("setLightLevelsMap from " + from);
+            LOGGER.info("setLightLevelsMap from " + from);
 
             var changed = false;
 

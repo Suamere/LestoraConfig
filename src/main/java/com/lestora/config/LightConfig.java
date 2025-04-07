@@ -14,6 +14,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LightConfig {
     private static final Logger LOGGER = LogManager.getLogger();
+
     static boolean isServerAuthoritative;
     static final Map<RLAmount, Integer> lightLevelsMap = new HashMap<>();
     static final Map<ResourceLocation, Integer> minCache = new HashMap<>();
@@ -216,8 +217,8 @@ public class LightConfig {
             if (from.equals("CLIENT") && isServerAuthoritative) return;
             else if (from.equals("SERVER")) isServerAuthoritative = true;
 
-//            System.err.println("setLightLevelsMap from " + from);
-//            LOGGER.error("setLightLevelsMap from " + from);
+            System.out.println("setLightLevelsMap from " + from);
+            LOGGER.info("setLightLevelsMap from " + from);
 
             var changed = false;
 

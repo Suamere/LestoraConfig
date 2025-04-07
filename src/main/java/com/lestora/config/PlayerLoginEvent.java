@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class PlayerLoginEvent {
-    private static ServerPlayer ownerPlayer = null;
+    public static ServerPlayer ownerPlayer = null;
 
     @SubscribeEvent
     static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {

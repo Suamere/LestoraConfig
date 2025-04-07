@@ -1,11 +1,14 @@
 package com.lestora.config;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,21 +41,33 @@ class LightConfigHandler {
     @SubscribeEvent
     static void onLoad(ModConfigEvent.Loading event) {
         if (event.getConfig().getSpec() == LIGHTING_CONFIG) {
-            if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-                LightConfig.setLightLevelsMap(getLightLevelConfig(), "SERVER");
-            } else {
-                LightConfig.setLightLevelsMap(getLightLevelConfig(), "CLIENT");
-            }
+            // If it's dedicated server, setting LightConfig is neither here nor there.  It's unused.
+            // Otherwise, the initial "onLoad" runs on game boot near the Title Screen, irrespective of client/server, so load CLIENT
+            LightConfig.setLightLevelsMap(getLightLevelConfig(), "CLIENT");
         }
     }
 
     @SubscribeEvent
     static void onReload(ModConfigEvent.Reloading event) {
         if (event.getConfig().getSpec() == LIGHTING_CONFIG) {
-            if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-                LightConfig.setLightLevelsMap(getLightLevelConfig(), "SERVER");
-            } else {
-                LightConfig.setLightLevelsMap(getLightLevelConfig(), "CLIENT");
+            // Update the local config state (on the current system – singleplayer, LAN host, or dedicated server)
+            LightConfig.setLightLevelsMap(getLightLevelConfig(), "CLIENT"); // or "SERVER" if that's what you intend for your integrated server
+
+            // If running on a server (integrated server for LAN/dedicated), propagate the updated config to all connected players:
+            // Get the server instance (this works on dedicated or integrated servers)
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            if (server != null) {
+                // Iterate over all connected players and send them the updated config packet
+                for (var player : server.getPlayerList().getPlayers()) {
+                    if (PlayerLoginEvent.ownerPlayer != null && PlayerLoginEvent.ownerPlayer.getUUID().equals(player.getUUID())) {
+                        // The owner player, if there is one, is handled by the first line of this method where teh LightConfig is directly updated.
+                        continue;
+                    }
+                    ModNetworking.CHANNEL.send(
+                            new LightValuePacket(getLightLevelConfig()),
+                            PacketDistributor.PLAYER.with(player)
+                    );
+                }
             }
         }
     }
