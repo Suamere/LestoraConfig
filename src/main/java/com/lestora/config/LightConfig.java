@@ -1,6 +1,8 @@
 package com.lestora.config;
 
 import net.minecraft.resources.ResourceLocation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LightConfig {
+    private static final Logger LOGGER = LogManager.getLogger();
     static boolean isServerAuthoritative;
     static final Map<RLAmount, Integer> lightLevelsMap = new HashMap<>();
     static final Map<ResourceLocation, Integer> minCache = new HashMap<>();
@@ -212,6 +215,9 @@ public class LightConfig {
         try {
             if (from.equals("CLIENT") && isServerAuthoritative) return;
             else if (from.equals("SERVER")) isServerAuthoritative = true;
+
+//            System.err.println("setLightLevelsMap from " + from);
+//            LOGGER.error("setLightLevelsMap from " + from);
 
             var changed = false;
 

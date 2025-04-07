@@ -25,6 +25,9 @@ class PlayerLogoutEvent {
                 LOGGER.info("Player returned to main menu");
                 LightConfig.setServerAuthoritative(false);
                 BiomeConfig.setServerAuthoritative(false);
+
+                LightConfig.setLightLevelsMap(LightConfigHandler.getLightLevelConfig(), "CLIENT");
+                BiomeConfig.setBiomeTempsMap(BiomeConfigHandler.getBiomeTempConfig(), "CLIENT");
             } else if (currentLevel != null && onMainMenu) {
                 onMainMenu = false;
                 LOGGER.info("Player logged in to some game");
