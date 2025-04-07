@@ -1,6 +1,5 @@
 package com.lestora.config;
 
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.SimpleChannel;
 import net.minecraftforge.network.ChannelBuilder;
@@ -21,13 +20,8 @@ class ModNetworking {
                 .decoder(LightValuePacket::decode)
                 .consumer((packet, context) -> {
                     context.enqueueWork(() -> {
-                        String source = "CLIENT";
-                        var mc = net.minecraft.client.Minecraft.getInstance();
-                        IntegratedServer integratedServer = mc.getSingleplayerServer();
-                        if (integratedServer != null && integratedServer.isPublished()) {
-                            source = "SERVER";
-                        }
-                        LightConfig.setLightLevelsMap(packet.lightLevelsMap(), source);
+                        // This is what runs on the client who joins, how they handle the packet
+                        LightConfig.setLightLevelsMap(packet.lightLevelsMap(), "SERVER");
                     });
                     context.setPacketHandled(true);
                 })
@@ -41,13 +35,8 @@ class ModNetworking {
                 .consumer((packet, context) -> {
                     context.enqueueWork(() -> {
                         context.enqueueWork(() -> {
-                            String source = "CLIENT";
-                            var mc = net.minecraft.client.Minecraft.getInstance();
-                            IntegratedServer integratedServer = mc.getSingleplayerServer();
-                            if (integratedServer != null && integratedServer.isPublished()) {
-                                source = "SERVER";
-                            }
-                            BiomeConfig.setBiomeTempsMap(packet.biomeTempsMap(), source);
+                            // This is what runs on the client who joins, how they handle the packet
+                            BiomeConfig.setBiomeTempsMap(packet.biomeTempsMap(), "SERVER");
                         });
                     });
                     context.setPacketHandled(true);

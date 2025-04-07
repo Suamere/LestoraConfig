@@ -3,9 +3,13 @@ package com.lestora.config;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod("lestora_config")
 public class LestoraConfigMod {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     final String BLUE = "\033[34m";
     final String WHITE = "\033[37m";
     final String RESET = "\033[0m";
@@ -17,21 +21,21 @@ public class LestoraConfigMod {
             if (!LightConfig.configFirstLoaded()) return;
 
             if (oldVal == null && newVal != null) {
-                System.out.println(
+                LOGGER.info(
                         BLUE + "Added Light Level configuration for: " + rl.getResource() +
                                 (rl.getAmount() > 1 ? BLUE + " (group of " + WHITE + rl.getAmount() + BLUE + ")" : "") +
                                 BLUE + " -- New Light Level: " + WHITE + newVal + RESET
                 );
             }
             else if (newVal == null && oldVal != null) {
-                System.out.println(
+                LOGGER.info(
                         BLUE + "Removed Light Level configuration for: " + rl.getResource() +
                                 (rl.getAmount() > 1 ? BLUE + " (group of " + WHITE + rl.getAmount() + BLUE + ")" : "") +
                                 BLUE + " -- Old Light Level: " + WHITE + oldVal + RESET
                 );
             }
             else if (newVal != null) {
-                System.out.println(
+                LOGGER.info(
                         BLUE + "Changed Light Level configuration for: " + rl.getResource() +
                                 (rl.getAmount() > 1 ? BLUE + " (group of " + WHITE + rl.getAmount() + BLUE + ")" : "") +
                                 BLUE + " -- From Light Level: " + WHITE + oldVal +

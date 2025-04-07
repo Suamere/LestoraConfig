@@ -1,24 +1,35 @@
 package com.lestora.config;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, value=Dist.CLIENT)
 class PlayerLogoutEvent {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static Level lastLevel = null;
+    private static boolean onMainMenu = true;
+
     @SubscribeEvent
-    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        // Debug output to verify this is running on the client.
-        System.err.println("PlayerLoggedOutEvent fired on client.");
-        if (Minecraft.getInstance() != null) {
-            System.err.println("Minecraft instance detected; we're on the client side.");
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        Level currentLevel = Minecraft.getInstance().level;
+
+        if (currentLevel != lastLevel) {
+            if (currentLevel == null && lastLevel != null) {
+                onMainMenu = true;
+                LOGGER.info("Player returned to main menu");
+                LightConfig.setServerAuthoritative(false);
+                BiomeConfig.setServerAuthoritative(false);
+            } else if (currentLevel != null && onMainMenu) {
+                onMainMenu = false;
+                LOGGER.info("Player logged in to some game");
+            }
+            lastLevel = currentLevel;
         }
-        // Reset the config state on the client.
-        LightConfig.setServerAuthoritative(false);
-        BiomeConfig.setServerAuthoritative(false);
     }
 }
