@@ -15,7 +15,11 @@ class PlayerLoginEvent {
     static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.getEntity().level().isClientSide() && event.getEntity() instanceof ServerPlayer serverPlayer) {
             ModNetworking.CHANNEL.send(
-                    new SpecialValuePacket(SharedConfigHandler.getLightLevelConfig()),
+                    new LightValuePacket(LightConfigHandler.getLightLevelConfig()),
+                    PacketDistributor.PLAYER.with(serverPlayer)
+            );
+            ModNetworking.CHANNEL.send(
+                    new BiomeValuePacket(BiomeConfigHandler.getBiomeTempConfig()),
                     PacketDistributor.PLAYER.with(serverPlayer)
             );
         }

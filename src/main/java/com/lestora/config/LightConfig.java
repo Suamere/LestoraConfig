@@ -7,18 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LightConfig {
     static boolean isServerAuthoritative;
-    static final Map<RLAmount, Integer> lightLevelsMap = new ConcurrentHashMap<>();
-    static final Map<ResourceLocation, Integer> minCache = new ConcurrentHashMap<>();
-    static final Map<ResourceLocation, Integer> maxCache = new ConcurrentHashMap<>();
+    static final Map<RLAmount, Integer> lightLevelsMap = new HashMap<>();
+    static final Map<ResourceLocation, Integer> minCache = new HashMap<>();
+    static final Map<ResourceLocation, Integer> maxCache = new HashMap<>();
 
-    static final Map<RLAmount, Integer> lightLevelsUniqueMap = new ConcurrentHashMap<>();
-    static final Map<ResourceLocation, Integer> minUniqueCache = new ConcurrentHashMap<>();
-    static final Map<ResourceLocation, Integer> maxUniqueCache = new ConcurrentHashMap<>();
+    static final Map<RLAmount, Integer> lightLevelsUniqueMap = new HashMap<>();
+    static final Map<ResourceLocation, Integer> minUniqueCache = new HashMap<>();
+    static final Map<ResourceLocation, Integer> maxUniqueCache = new HashMap<>();
 
-    static final Map<RLAmount, Integer> defaultLightLevels = new ConcurrentHashMap<>();
+    static final Map<RLAmount, Integer> defaultLightLevels = new HashMap<>();
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock();
     static final List<LightChangeListener> listenerSub = new ArrayList<>();
     static final List<Runnable> fullSub = new ArrayList<>();
     static boolean firstLoad = false;
@@ -115,31 +118,61 @@ public class LightConfig {
     public static Map<RLAmount, Integer> getLightLevels() { return new HashMap<>(lightLevelsMap); }
 
     public static Integer getLightLevel(ResourceLocation rl, int amount) {
-        return lightLevelsMap.get(new RLAmount(rl, amount));
+        lock.readLock().lock();
+        try {
+            return lightLevelsMap.get(new RLAmount(rl, amount));
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public static Integer getMinLightLevel(ResourceLocation rl) {
-        cacheMinAndMax(rl);
-        return minCache.get(rl);
+        lock.readLock().lock();
+        try {
+            cacheMinAndMax(rl);
+            return minCache.get(rl);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public static Integer getMaxLightLevel(ResourceLocation rl) {
-        cacheMinAndMax(rl);
-        return maxCache.get(rl);
+        lock.readLock().lock();
+        try {
+            cacheMinAndMax(rl);
+            return maxCache.get(rl);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public static Integer getUniqueLightLevel(ResourceLocation rl, int amount) {
-        return lightLevelsUniqueMap.get(new RLAmount(rl, amount));
+        lock.readLock().lock();
+        try {
+            return lightLevelsUniqueMap.get(new RLAmount(rl, amount));
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public static Integer getUniqueMinLightLevel(ResourceLocation rl) {
-        cacheUniqueMinAndMax(rl);
-        return minUniqueCache.get(rl);
+        lock.readLock().lock();
+        try {
+            cacheUniqueMinAndMax(rl);
+            return minUniqueCache.get(rl);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public static Integer getUniqueMaxLightLevel(ResourceLocation rl) {
-        cacheUniqueMinAndMax(rl);
-        return maxUniqueCache.get(rl);
+        lock.readLock().lock();
+        try {
+            cacheUniqueMinAndMax(rl);
+            return maxUniqueCache.get(rl);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     static void cacheUniqueMinAndMax(ResourceLocation rl) {
@@ -175,107 +208,112 @@ public class LightConfig {
     }
 
     static void setLightLevelsMap(List<String> stringMap, String from) {
-        if (from.equals("CLIENT") && isServerAuthoritative) return;
-        else if (from.equals("SERVER")) isServerAuthoritative = true;
+        lock.writeLock().lock();
+        try {
+            if (from.equals("CLIENT") && isServerAuthoritative) return;
+            else if (from.equals("SERVER")) isServerAuthoritative = true;
 
-        var changed = false;
+            var changed = false;
 
-        // Clear caches as we'll modify lightLevelsMap.
-        minCache.clear();
-        maxCache.clear();
-        minUniqueCache.clear();
-        maxUniqueCache.clear();
+            // Clear caches as we'll modify lightLevelsMap.
+            minCache.clear();
+            maxCache.clear();
+            minUniqueCache.clear();
+            maxUniqueCache.clear();
 
-        // Parse new values into a temporary map.
-        Map<RLAmount, Integer> newMap = new HashMap<>();
-        for (String entry : stringMap) {
-            String[] split = entry.split("=");
-            if (split.length == 2) {
-                String itemId = split[0].trim();
-                try {
-                    int level = Integer.parseInt(split[1].trim());
-                    int amount = 1;
-                    if (itemId.contains("(")) {
-                        int start = itemId.indexOf('(');
-                        int end = itemId.indexOf(')', start);
-                        amount = Integer.parseInt(itemId.substring(start + 1, end));
-                        itemId = itemId.substring(0, start).trim();
-                    }
-                    ResourceLocation loc = ResourceLocation.tryParse(itemId);
-                    if (loc != null) {
-                        newMap.put(new RLAmount(loc, amount), level);
-                    } else {
-                        System.err.println("Invalid ResourceLocation: " + itemId);
-                    }
-
-                    if (itemId.toLowerCase().equals("minecraft:torch")) {
-                        ResourceLocation loc2 = ResourceLocation.tryParse("minecraft:wall_torch");
-                        if (loc2 != null) {
-                            newMap.put(new RLAmount(loc2, amount), level);
-                        } else {
-                            System.err.println("Invalid ResourceLocation: " + "minecraft:wall_torch");
+            // Parse new values into a temporary map.
+            Map<RLAmount, Integer> newMap = new HashMap<>();
+            for (String entry : stringMap) {
+                String[] split = entry.split("=");
+                if (split.length == 2) {
+                    String itemId = split[0].trim();
+                    try {
+                        int level = Integer.parseInt(split[1].trim());
+                        int amount = 1;
+                        if (itemId.contains("(")) {
+                            int start = itemId.indexOf('(');
+                            int end = itemId.indexOf(')', start);
+                            amount = Integer.parseInt(itemId.substring(start + 1, end));
+                            itemId = itemId.substring(0, start).trim();
                         }
-                    } else if (itemId.toLowerCase().equals("minecraft:redstone_torch")) {
-                        ResourceLocation loc2 = ResourceLocation.tryParse("minecraft:redstone_wall_torch");
-                        if (loc2 != null) {
-                            newMap.put(new RLAmount(loc2, amount), level);
+                        ResourceLocation loc = ResourceLocation.tryParse(itemId);
+                        if (loc != null) {
+                            newMap.put(new RLAmount(loc, amount), level);
                         } else {
-                            System.err.println("Invalid ResourceLocation: " + "minecraft:redstone_wall_torch");
+                            System.err.println("Invalid ResourceLocation: " + itemId);
                         }
+
+                        if (itemId.toLowerCase().equals("minecraft:torch")) {
+                            ResourceLocation loc2 = ResourceLocation.tryParse("minecraft:wall_torch");
+                            if (loc2 != null) {
+                                newMap.put(new RLAmount(loc2, amount), level);
+                            } else {
+                                System.err.println("Invalid ResourceLocation: " + "minecraft:wall_torch");
+                            }
+                        } else if (itemId.toLowerCase().equals("minecraft:redstone_torch")) {
+                            ResourceLocation loc2 = ResourceLocation.tryParse("minecraft:redstone_wall_torch");
+                            if (loc2 != null) {
+                                newMap.put(new RLAmount(loc2, amount), level);
+                            } else {
+                                System.err.println("Invalid ResourceLocation: " + "minecraft:redstone_wall_torch");
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Failed to parse light level for entry: " + entry);
                     }
-                } catch (NumberFormatException e) {
-                    System.err.println("Failed to parse light level for entry: " + entry);
+                } else {
+                    System.err.println("Entry is not in expected 'key = value' format: " + entry);
                 }
-            } else {
-                System.err.println("Entry is not in expected 'key = value' format: " + entry);
             }
-        }
 
-        // Process additions and updates.
-        for (var newEntry : newMap.entrySet()) {
-            RLAmount key = newEntry.getKey();
-            int newValue = newEntry.getValue();
-            if (!lightLevelsMap.containsKey(key)) {
-                lightLevelsMap.put(key, newValue);
-                listenerSub.forEach(sub -> sub.onChange(key, null, newValue));
-                changed = true;
-            } else {
-                int oldValue = lightLevelsMap.get(key);
-                if (oldValue != newValue) {
+            // Process additions and updates.
+            for (var newEntry : newMap.entrySet()) {
+                RLAmount key = newEntry.getKey();
+                int newValue = newEntry.getValue();
+                if (!lightLevelsMap.containsKey(key)) {
                     lightLevelsMap.put(key, newValue);
-                    listenerSub.forEach(sub -> sub.onChange(key, oldValue, newValue));
+                    listenerSub.forEach(sub -> sub.onChange(key, null, newValue));
+                    changed = true;
+                } else {
+                    int oldValue = lightLevelsMap.get(key);
+                    if (oldValue != newValue) {
+                        lightLevelsMap.put(key, newValue);
+                        listenerSub.forEach(sub -> sub.onChange(key, oldValue, newValue));
+                        changed = true;
+                    }
+                }
+
+                if (!lightLevelsUniqueMap.containsKey(key)) {
+                    if (isDefault(key, newValue))
+                        lightLevelsUniqueMap.remove(key);
+                    else
+                        lightLevelsUniqueMap.put(key, newValue);
+                } else {
+                    int oldValue = lightLevelsUniqueMap.get(key);
+                    if (oldValue != newValue)
+                        lightLevelsUniqueMap.put(key, newValue);
+                }
+            }
+
+            // Process removals.
+            var it = lightLevelsMap.keySet().iterator();
+            while (it.hasNext()) {
+                RLAmount key = it.next();
+                if (!newMap.containsKey(key)) {
+                    int oldValue = lightLevelsMap.get(key);
+                    it.remove();
+                    lightLevelsUniqueMap.remove(key);
+                    listenerSub.forEach(sub -> sub.onChange(key, oldValue, null));
                     changed = true;
                 }
             }
 
-            if (!lightLevelsUniqueMap.containsKey(key)) {
-                if (isDefault(key, newValue))
-                    lightLevelsUniqueMap.remove(key);
-                else
-                    lightLevelsUniqueMap.put(key, newValue);
-            } else {
-                int oldValue = lightLevelsUniqueMap.get(key);
-                if (oldValue != newValue)
-                    lightLevelsUniqueMap.put(key, newValue);
-            }
+            if (changed)
+                fullSub.forEach(Runnable::run);
+            firstLoad = true;
+        } finally {
+            lock.writeLock().unlock();
         }
-
-        // Process removals.
-        var it = lightLevelsMap.keySet().iterator();
-        while (it.hasNext()) {
-            RLAmount key = it.next();
-            if (!newMap.containsKey(key)) {
-                int oldValue = lightLevelsMap.get(key);
-                it.remove();
-                lightLevelsUniqueMap.remove(key);
-                listenerSub.forEach(sub -> sub.onChange(key, oldValue, null));
-                changed = true;
-            }
-        }
-
-        if (changed)
-            fullSub.forEach(Runnable::run);
-        firstLoad = true;
     }
 
     static boolean isDefault(RLAmount key, int val) {

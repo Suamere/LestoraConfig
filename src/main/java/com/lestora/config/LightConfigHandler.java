@@ -8,12 +8,11 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 // A class to handle config events on the server.
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-class SharedConfigHandler {
+class LightConfigHandler {
     public static final ForgeConfigSpec LIGHTING_CONFIG;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> LIGHT_LEVELS;
 

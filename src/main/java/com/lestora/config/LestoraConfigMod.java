@@ -11,9 +11,8 @@ public class LestoraConfigMod {
     final String RESET = "\033[0m";
 
     public LestoraConfigMod(FMLJavaModLoadingContext constructContext) {
-        ModNetworking.register();
-        constructContext.registerConfig(ModConfig.Type.COMMON, SharedConfigHandler.LIGHTING_CONFIG, "lestora-lighting.toml");
-
+        ModNetworking.registerLightConfig();
+        constructContext.registerConfig(ModConfig.Type.COMMON, LightConfigHandler.LIGHTING_CONFIG, "lestora-lighting.toml");
         LightConfig.subscribe((rl, oldVal, newVal) -> {
             if (!LightConfig.configFirstLoaded()) return;
 
@@ -37,6 +36,29 @@ public class LestoraConfigMod {
                                 (rl.getAmount() > 1 ? BLUE + " (group of " + WHITE + rl.getAmount() + BLUE + ")" : "") +
                                 BLUE + " -- From Light Level: " + WHITE + oldVal +
                                 BLUE + " To Light Level: " + WHITE + newVal + RESET
+                );
+            }
+        });
+
+
+        ModNetworking.registerBiomeConfig();
+        constructContext.registerConfig(ModConfig.Type.COMMON, BiomeConfigHandler.BIOME_CONFIG, "lestora-biome.toml");
+        BiomeConfig.subscribe((rl, oldVal, newVal) -> {
+            if (!BiomeConfig.configFirstLoaded()) return;
+
+            if (oldVal == null && newVal != null) {
+                System.out.println(
+                        BLUE + "Added Biome configuration for: " + rl + BLUE + " -- New Biome Temp: " + WHITE + newVal + RESET
+                );
+            }
+            else if (newVal == null && oldVal != null) {
+                System.out.println(
+                        BLUE + "Removed Biome configuration for: " + rl + BLUE + " -- Old Biome Temp: " + WHITE + oldVal + RESET
+                );
+            }
+            else if (newVal != null) {
+                System.out.println(
+                        BLUE + "Changed Biome configuration for: " + rl + BLUE + " -- From Biome Temp: " + WHITE + oldVal + BLUE + " To Biome Temp: " + WHITE + newVal + RESET
                 );
             }
         });

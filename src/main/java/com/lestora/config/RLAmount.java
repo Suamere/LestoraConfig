@@ -18,7 +18,7 @@ public class RLAmount {
         this.amount = amount;
         this.blockType = ForgeRegistries.BLOCKS.getValue(resource);
         if (this.blockType == null || this.blockType == Blocks.AIR) {
-            System.err.println("Resource " + resource + " resolved to Blocks.AIR.  If it wasn't air on purpose... this means your config file has something odd in it");
+            System.err.println("Resource " + resource + " resolved to Blocks.AIR.  That's weird whether expected or not.");
         }
     }
 
@@ -41,7 +41,7 @@ public class RLAmount {
 
     @Override
     public String toString() {
-        return resource.toString() + (amount != 0 ? "(" + amount + ")" : "");
+        return resource.toString() + "(" + amount + ")";
     }
 
     public boolean stateMatches(BlockState blockState) {
@@ -109,6 +109,6 @@ public class RLAmount {
             return candles == amount;
         }
 
-        return amount == 0;
+        return amount > 0;
     }
 }
