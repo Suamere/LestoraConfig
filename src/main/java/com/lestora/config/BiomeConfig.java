@@ -208,4 +208,8 @@ public class BiomeConfig {
         var defaultVal = defaultBiomeTemps.get(key);
         return defaultVal != null && defaultVal.equals(val);
     }
+
+    public static void setServerAuthoritative(boolean b) {
+        isServerAuthoritative = b;
+    }
 }

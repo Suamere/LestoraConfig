@@ -320,4 +320,8 @@ public class LightConfig {
         Integer defaultVal = defaultLightLevels.get(key);
         return defaultVal != null && defaultVal == val;
     }
+
+    public static void setServerAuthoritative(boolean b) {
+        isServerAuthoritative = b;
+    }
 }
