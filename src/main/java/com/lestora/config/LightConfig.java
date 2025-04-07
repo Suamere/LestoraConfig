@@ -7,8 +7,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -120,11 +120,20 @@ public class LightConfig {
     public static Map<RLAmount, Integer> getUniqueLightLevels() { return new HashMap<>(lightLevelsUniqueMap); }
     public static Map<RLAmount, Integer> getDefaultLightLevels() { return new HashMap<>(defaultLightLevels); }
     public static Map<RLAmount, Integer> getLightLevels() { return new HashMap<>(lightLevelsMap); }
+    private static final Map<String, RLAmount> rlAmountCache = new ConcurrentHashMap<>();
+
+    // Helper method to get a canonical RLAmount instance
+    public static RLAmount getCachedRLAmount(ResourceLocation rl, int amount) {
+        // Construct a unique key; you can also use a pair if you prefer.
+        String key = rl.toString() + ":" + amount;
+        return rlAmountCache.computeIfAbsent(key, k -> new RLAmount(rl, amount));
+    }
 
     public static Integer getLightLevel(ResourceLocation rl, int amount) {
         lock.readLock().lock();
         try {
-            return lightLevelsMap.get(new RLAmount(rl, amount));
+            RLAmount cachedKey = getCachedRLAmount(rl, amount);
+            return lightLevelsMap.get(cachedKey);
         } finally {
             lock.readLock().unlock();
         }
@@ -153,7 +162,8 @@ public class LightConfig {
     public static Integer getUniqueLightLevel(ResourceLocation rl, int amount) {
         lock.readLock().lock();
         try {
-            return lightLevelsUniqueMap.get(new RLAmount(rl, amount));
+            RLAmount cachedKey = getCachedRLAmount(rl, amount);
+            return lightLevelsUniqueMap.get(cachedKey);
         } finally {
             lock.readLock().unlock();
         }
