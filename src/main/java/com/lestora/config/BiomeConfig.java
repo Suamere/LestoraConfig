@@ -4,10 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -18,6 +16,8 @@ public class BiomeConfig {
     static final Map<ResourceLocation, Float> biomeTempMap = new HashMap<>();
     static final Map<ResourceLocation, Float> biomeTempUniqueMap = new HashMap<>();
     static final Map<ResourceLocation, Float> defaultBiomeTemps = new HashMap<>();
+
+    private static final ConcurrentHashMap<UUID, BiomeSelectiveSubscription> selectiveBiomeListeners = new ConcurrentHashMap<>();
 
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
     static final List<BiomeChangeListener> listenerSub = new ArrayList<>();
@@ -98,6 +98,24 @@ public class BiomeConfig {
 
     public static void subscribe(Runnable onTemperatureChanged) {
         fullSub.add(onTemperatureChanged);
+    }
+
+    public static UUID subscribeSelective(BiomeChangeListener listener, ResourceLocation... keys) {
+        Set<ResourceLocation> keySet = new HashSet<>(Arrays.asList(keys));
+        // Iterate over existing subscriptions.
+        for (Map.Entry<UUID, BiomeSelectiveSubscription> entry : selectiveBiomeListeners.entrySet()) {
+            BiomeSelectiveSubscription sub = entry.getValue();
+            // Assuming listener equality works by reference.
+            if (sub.listener.equals(listener)) {
+                // Add the new keys and return the same UUID.
+                sub.keys.addAll(keySet);
+                return entry.getKey();
+            }
+        }
+        // No existing subscription found; create a new one.
+        UUID id = UUID.randomUUID();
+        selectiveBiomeListeners.put(id, new BiomeSelectiveSubscription(keySet, listener));
+        return id;
     }
 
     public static Map<ResourceLocation, Float> getUniqueBiomeTemps() { return new HashMap<>(biomeTempUniqueMap); }
