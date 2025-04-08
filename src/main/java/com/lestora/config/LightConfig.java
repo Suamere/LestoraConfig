@@ -4,10 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -25,6 +22,8 @@ public class LightConfig {
     static final Map<ResourceLocation, Integer> maxUniqueCache = new HashMap<>();
 
     static final Map<RLAmount, Integer> defaultLightLevels = new HashMap<>();
+    private static final ConcurrentHashMap<UUID, LightSelectiveSubscription> selectiveLightListeners = new ConcurrentHashMap<>();
+
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
     static final List<LightChangeListener> listenerSub = new ArrayList<>();
     static final List<Runnable> fullSub = new ArrayList<>();
@@ -117,13 +116,35 @@ public class LightConfig {
         fullSub.add(onLevelsChanged);
     }
 
+    public static UUID subscribeSelective(LightChangeListener listener, ResourceLocation... keys) {
+        Set<ResourceLocation> keySet = new HashSet<>(Arrays.asList(keys));
+        // Iterate over existing subscriptions.
+        for (Map.Entry<UUID, LightSelectiveSubscription> entry : selectiveLightListeners.entrySet()) {
+            LightSelectiveSubscription sub = entry.getValue();
+            // Assuming listener equality works by reference.
+            if (sub.listener.equals(listener)) {
+                // Add the new keys and return the same UUID.
+                sub.keys.addAll(keySet);
+                return entry.getKey();
+            }
+        }
+        // No existing subscription found; create a new one.
+        UUID id = UUID.randomUUID();
+        selectiveLightListeners.put(id, new LightSelectiveSubscription(keySet, listener));
+        return id;
+    }
+
+    public static void unsubscribeSelective(UUID subscriptionId) {
+        selectiveLightListeners.remove(subscriptionId);
+    }
+
     public static Map<RLAmount, Integer> getUniqueLightLevels() { return new HashMap<>(lightLevelsUniqueMap); }
     public static Map<RLAmount, Integer> getDefaultLightLevels() { return new HashMap<>(defaultLightLevels); }
     public static Map<RLAmount, Integer> getLightLevels() { return new HashMap<>(lightLevelsMap); }
     private static final Map<String, RLAmount> rlAmountCache = new ConcurrentHashMap<>();
 
     // Helper method to get a canonical RLAmount instance
-    public static RLAmount getCachedRLAmount(ResourceLocation rl, int amount) {
+    private static RLAmount getCachedRLAmount(ResourceLocation rl, int amount) {
         // Construct a unique key; you can also use a pair if you prefer.
         String key = rl.toString() + ":" + amount;
         return rlAmountCache.computeIfAbsent(key, k -> new RLAmount(rl, amount));
@@ -290,12 +311,13 @@ public class LightConfig {
                 if (!lightLevelsMap.containsKey(key)) {
                     lightLevelsMap.put(key, newValue);
                     listenerSub.forEach(sub -> sub.onChange(key, null, newValue));
+                    Notify(key, null, newValue);
                     changed = true;
                 } else {
                     int oldValue = lightLevelsMap.get(key);
                     if (oldValue != newValue) {
                         lightLevelsMap.put(key, newValue);
-                        listenerSub.forEach(sub -> sub.onChange(key, oldValue, newValue));
+                        Notify(key, oldValue, newValue);
                         changed = true;
                     }
                 }
@@ -320,7 +342,7 @@ public class LightConfig {
                     int oldValue = lightLevelsMap.get(key);
                     it.remove();
                     lightLevelsUniqueMap.remove(key);
-                    listenerSub.forEach(sub -> sub.onChange(key, oldValue, null));
+                    Notify(key, oldValue, null);
                     changed = true;
                 }
             }
@@ -330,6 +352,15 @@ public class LightConfig {
             firstLoad = true;
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    private static void Notify(RLAmount key, Integer oldValue, Integer newValue) {
+        listenerSub.forEach(sub -> sub.onChange(key, oldValue, newValue));
+        for (var sub : selectiveLightListeners.values()) {
+            if (sub.keys.contains(key.getResource())) {
+                sub.listener.onChange(key, oldValue, newValue);
+            }
         }
     }
 
